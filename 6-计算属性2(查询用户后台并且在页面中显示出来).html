@@ -1,0 +1,99 @@
+<!-- 获取后台数据并且进行模糊查询 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>计算属性2</title>
+	<script type="text/javascript" src="../../jquery-2.1.4/jquery.min.js"></script>
+	<script type="text/javascript" src="js/vue.js"></script>
+</head>
+<body>
+	<div id="app">
+	<input type="text" v-model="search">
+<!-- 遍历渲染 v-for="item in arr" -->
+<!-- v-for="(item,index)in arr" -->
+<table>
+	<tr>
+		<th>username</th>
+		<th>nickname</th>
+		<th>email</th>
+		<!-- <th>头像</th> -->
+		<th>头像2</th>
+	</tr>
+	<tr v-for="item in userList">
+		<td>{{item.username}}</td>
+		<td>{{item.nickname}}</td>
+		<td>{{item.email}}</td>
+		<!-- <td>{{item.userface}}</td> -->
+		<td><img :width="imgWidth" :heigth="imgHeight" :src="item.userface?item.userface:'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2176837628,926516992&fm=26&gp=0.jpg'" alt=""></td>
+	</tr>
+</table>
+
+
+
+	<!-- 过滤后的数据 -->
+		{{userList}}
+	--------------------------------------------------
+		{{users}}
+	</div>
+	<script type="text/javascript">
+		let vue = new Vue({
+			el:'#app',
+			data:{
+				users:[],
+				search:'',
+				// search:'demo', 默认搜索
+				// v-model="search",这里必须有search
+				imgWidth:'100px',
+				imgHeight:'100px'
+			},
+			methods:{
+				getData(url,type,data){
+					return new Promise(function(resolve,reject){
+						$.ajax({
+							url:url,
+							type:type,
+							data:data,
+							success:function(res){
+								resolve(res);
+							},error:function(error){
+								reject(error);
+							}
+						});
+					});
+				},
+			},
+			computed:{
+				userList(){
+					let vm = this;
+					// 无法确定this值是自己想要的那个，所以在刚开始的地方要先给this赋个值
+					if(this.users.length>0){
+						return this.users.filter(function(item){
+						console.log(vm.search);
+						if(item.username){
+						return item.username.indexOf(vm.search)!=-1;
+
+						}
+					});
+				}else{
+					return [];
+				}
+			}
+					
+			},
+			created(){
+				let vm = this;
+				//vue实例构建完毕,属性和方法也构建完毕
+				//访问后台，获取数据
+				this.getData('http://120.78.164.247:8099/manager/user/findAllUser','GET',null).then(function(res){
+					console.log(res);
+					// 获取的数据在res中
+					vm.users=res.data;
+				}).catch(function(error){
+					console.log(error);
+				});
+			}
+		});
+	</script>
+</body>
+</html>
